@@ -1,0 +1,50 @@
+# Default values
+# https://artifacthub.io/packages/helm/bitnami/mongodb
+persistence:
+    storageClass: default
+auth:
+    rootUser: ENC[AES256_GCM,data:jUeVyg==,iv:r7yusF4MucMRyhusFKyIASG8/vyWyntKeO6v6eZf3Bs=,tag:F8VWZqKUHFIjZZk4cICXhg==,type:str]
+    rootPassword: ENC[AES256_GCM,data:ggy1Yhuu4Vo=,iv:X7hLn80yK4nwgD0CYry0TIhctYUTzb6S8mmZqVRMgfk=,tag:5DmfbBe64ZDo1ybodwN9ag==,type:str]
+    usernames:
+        - ENC[AES256_GCM,data:bi4Ju8k=,iv:70UcQTMquDtvmU6aZZ9cqNPRrLfed5rvwApo67FvdKE=,tag:vM+kChcexqCC0t/0kxrxTw==,type:str]
+    databases:
+        - ENC[AES256_GCM,data:/uFXPP7Fng==,iv:alT7TTfo3TeFfS9CQSREQcxdNwwd1Ju7ViHPfkXCZRA=,tag:k8jSP4WoMuTosmR4F4FuRQ==,type:str]
+    passwords:
+        - ENC[AES256_GCM,data:551PYnPVpD0=,iv:Si5CIHsX72mAwvUUWxzfPp2Rn08n05V575QdxPhSduQ=,tag:yhLy5x1mMspQg6+JR1YA/Q==,type:str]
+metrics:
+    enabled: true
+    serviceMonitor:
+        enabled: true
+        labels:
+            release: prometheus
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2023-09-28T02:33:24Z"
+    mac: ENC[AES256_GCM,data:defdBlFcFUCdo06NU22bDMovXupiMn1fOvzXOOvL1bUeVNnODjAyrzlxQh4N9FZ9opPPLOVpu3uF28i6PeBgYYJbSXptaQAKPx2o//6OGmil/R4uYDjRNoI3KR/Hmyi+Fe2H0fo1Xy9xT1c7WWqID6NytDXKU/t7RnEzt8Q72+s=,iv:/0ZpidMV3R2OSfpsGJ5EyorwLc1Vvt2F1N/kDaPd7RQ=,tag:mwSG+TYVB0M329DRxnTrKw==,type:str]
+    pgp:
+        - created_at: "2023-09-28T02:33:22Z"
+          enc: |
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMA38T7Az157GMAQ/8DTvIjIIUm5HnXPbABzAxgwUAPQ2QfSqXCeM36q5ciULF
+            +ZTQHQzuXgutjEzHC8on3WowZxwUd9TDYknZaLYpX2jBkJojHJxgHeRzfAeHB3Fe
+            h7FrV0JN88gGwzI0Bgnm3EVq7IeMLXDdQSKX/CnHT+mpnKTZGBTwx8mjIhz9WWkv
+            7ZvzSwwnUuS/iV0EUS8dAKjfvqS0/biGudeOMcyqYM14dVzyMotDMB7g8c/oBNCR
+            ulDFgDuknu+7S004jDHPypgnDmYlZa1CdiMylYSf3qCSaX2vdbVp0n7hGhx9R9nE
+            rSnLqGExJrkovqbjXXPd63UXQClMzq/iD9GhLrLCSel8a+TsTyq6dOWt8Cg1vzRI
+            tmg7Hng4whld/bwEO1q7AaX4VrvjW8SebII3wR8B/snh0jYaL8w2DiQk04hyvN9f
+            yhIudmBxXZPLuwq6tlxlwU2/2QK5xPJ8qrGN1UoAZNvYfL/V9evnKSf9sM5m8N1M
+            zyTNqTo+NPdpD5MzFI3oT5GFcl5JyxpbMclKM6qzjrFY2YljKwJiWvajyODedeka
+            0h70dTN6Y0MlDVkIXVyYrP8llWPVumFXd8rUONWWFGMoiyQi9pEbsqLQYbms3iXU
+            dMJ1gEvHweBU2sSdGT+wxkjEOZxA2e0pffGzmJMrwDFCzJHIE2J0I95T1OcoqBHS
+            XgFKhDjlrjjM9WnaJ+hMb1NNarp5GIPSwtemPsgLd8pfI505NwbuTa2WFovZjuke
+            zI5qPWkxlyK//I2jtOSfgNBKxds4IZik+v+3V9nHJr5bTPNTJUh0zivfWGwa9qE=
+            =EKBq
+            -----END PGP MESSAGE-----
+          fp: 129994A38E40322EE2A4FA6CB59C51DA13B1BF22
+    encrypted_regex: ^(auth)$
+    version: 3.7.3

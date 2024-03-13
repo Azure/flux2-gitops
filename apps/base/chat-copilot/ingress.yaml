@@ -1,0 +1,71 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+  name: chat-copilot-webapp
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: chat-copilot-webapp.example.com
+    http:
+      paths:
+      - backend:
+          service: 
+            name: chat-copilot-webapp
+            port: 
+              number: 3000
+        path: /
+        pathType: ImplementationSpecific
+  tls:
+  - hosts:
+    - chat-copilot-webapp.example.com
+    secretName: chat-copilot-webapp-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+  name: chat-copilot-webapi
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: chat-copilot-webapi.example.com
+    http:
+      paths:
+      - backend:
+          service: 
+            name: chat-copilot-webapi
+            port: 
+              number: 8080
+        path: /
+        pathType: ImplementationSpecific
+  tls:
+  - hosts:
+    - chat-copilot-webapi.example.com
+    secretName: chat-copilot-webapi-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+  name: chat-copilot-web-searcher
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: chat-copilot-web-searcher.example.com
+    http:
+      paths:
+      - backend:
+          service: 
+            name: chat-copilot-web-searcher
+            port: 
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+  tls:
+  - hosts:
+    - chat-copilot-web-searcher.example.com
+    secretName: chat-copilot-web-searcher-tls

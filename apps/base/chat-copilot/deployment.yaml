@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: chat-copilot-webapp
+  name: chat-copilot-webapp
+spec:
+  selector:
+    matchLabels:
+      app: chat-copilot-webapp
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: chat-copilot-webapp
+    spec:
+      containers:
+      - image: ghcr.io/huangyingting/chat-copilot-webapp-nginx:main
+        imagePullPolicy: Always
+        name: chat-copilot-webapp
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: chat-copilot-webapi
+  name: chat-copilot-webapi
+spec:
+  selector:
+    matchLabels:
+      app: chat-copilot-webapi
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: chat-copilot-webapi
+    spec:
+      initContainers:
+      - name: wait-for-web-searcher
+        image: curlimages/curl:latest
+        command: ["/bin/sh","-c"]
+        args: ["while [ $(curl -sw '%{http_code}' http://chat-copilot-web-searcher -o /dev/null) -ne 200 ]; do sleep 2; echo 'Waiting for the webserver...'; done"]
+      containers:
+      - image: ghcr.io/huangyingting/chat-copilot-webapi:main
+        imagePullPolicy: Always
+        name: chat-copilot-webapi
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: chat-copilot-web-searcher
+  name: chat-copilot-web-searcher
+spec:
+  selector:
+    matchLabels:
+      app: chat-copilot-web-searcher
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: chat-copilot-web-searcher
+    spec:
+      containers:
+      - image: ghcr.io/huangyingting/chat-copilot-web-searcher:main
+        imagePullPolicy: Always
+        name: chat-copilot-web-searcher
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: chat-copilot-memorypipeline
+  name: chat-copilot-memorypipeline
+spec:
+  selector:
+    matchLabels:
+      app: chat-copilot-memorypipeline
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: chat-copilot-memorypipeline
+    spec:
+      containers:
+      - image: ghcr.io/huangyingting/chat-copilot-memorypipeline:main
+        imagePullPolicy: Always
+        name: chat-copilot-memorypipeline
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP

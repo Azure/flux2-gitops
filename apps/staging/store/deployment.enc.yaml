@@ -1,0 +1,568 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: order-service
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: order-service
+    template:
+        metadata:
+            labels:
+                app: order-service
+        spec:
+            nodeSelector:
+                kubernetes.io/os: linux
+            containers:
+                - name: order-service
+                  image: ghcr.io/huangyingting/store/order-service:latest
+                  imagePullPolicy: Always
+                  ports:
+                    - containerPort: 3000
+                  env:
+                    - name: ORDER_QUEUE_HOSTNAME
+                      value: rabbitmq.rabbitmq
+                    - name: ORDER_QUEUE_PORT
+                      value: "5672"
+                    - name: ORDER_QUEUE_USERNAME
+                      value: rabbitmq
+                    - name: ORDER_QUEUE_PASSWORD
+                      value: P@ssw0rd
+                    - name: ORDER_QUEUE_NAME
+                      value: orders
+                    - name: FASTIFY_ADDRESS
+                      value: 0.0.0.0
+                  resources:
+                    requests:
+                        cpu: 10m
+                        memory: 50Mi
+                    limits:
+                        cpu: 20m
+                        memory: 128Mi
+            initContainers:
+                - name: wait-for-rabbitmq
+                  image: busybox
+                  command:
+                    - sh
+                    - -c
+                    - until nc -zv rabbitmq.rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;
+                  resources:
+                    requests:
+                        cpu: 10m
+                        memory: 64Mi
+                    limits:
+                        cpu: 20m
+                        memory: 128Mi
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2023-09-28T09:21:23Z"
+    mac: ENC[AES256_GCM,data:O3gMM1zuojbl7FnJZv/odIf9yRXbod5BXZiluUQUL+LVfC4NsPozYXHFfkwpkXZXcbBtIDr3eUiQ52pcKnX+LOqE3JWuYaLEl+UqisLpL0ryQcSwhCTAQwcrNZ+K9FtzyhtBuBfgdagp8lkrEzo1MTJOUPNVfZriEcsXjr4r1fA=,iv:pkYf45ju8xN/0HJi6SqpjaFsjYURajV/bMogPhmmbuY=,tag:llqo6i709Go9z2FEz9vLAw==,type:str]
+    pgp:
+        - created_at: "2023-09-28T09:21:22Z"
+          enc: |
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMA38T7Az157GMARAAnh6jdTJ6Dyv6wU/YhKLsMOcoGEUTXO9KMZIvtQVTz6l8
+            y5Bz4P2tt4AumPFvGf34Pkh6r0j/jf18Z00TRc35SQcxNZnh4B11XvrPlDdWQaY0
+            gWwdiLlUaPqZttpp1WsPrcTBxFRO1kMwu+UsPhhZBtOpC3KQ3wbohsJ0QmhaNxil
+            ZHotvvw7cX5l9jbGC4qw0a9M6mfY5FhGRFHS11Tf7Ve3WiPlKSz5R3mh4ZMlcxVk
+            uE7Jqldw0alhqoJ7AxIR8ZJ5fslUml5KrXn5WHdx3BhgjkiFeYwcnwknbISNhQcy
+            lZ/Kr1ioaHlD9lg+E0rQKP1VAmEYIxZKxeYhJPtnDv6UPxrGAUm2TcAKv2Np7O2M
+            gki45eJiUu1qDHJq5VoGFeDaKzXCoavXLO9r9AmtcfgnKUIJolGP4fjzM3Wt3Cyv
+            qf72Nnxe17OCwHPrFpwm/2HHJULjv0SJj0mLiF4pYlzhL3Ao7SHVM9wqJQrfTSGD
+            n4PmPxomDKRMzP+lodcO2unGdhqksno3bybaWf4Wc2qy6OT2IyfoWHQzZBULPCUr
+            /BGjund2g4+3fCHYd52PKXwZs3oEw07BbJc/I9oiFZYa8Nv81TTEVrRllS0gTAGL
+            rRcVpnL4gaapdM3T1sBmZ0u/3CVecS1U5TDIWqycBMetYH4y3I0PLilEa+uXknzS
+            XAETRHUb+sdrRl/NT3gVw2TC8+R6/fM5FozeJDn910hLDUabRvpwRrzcTzyG0dpC
+            oRyj6q18eEC/MifRVG0NbslVCBwg69e3XLtwpJ0awatTO2CzdsfPXmzXdezs
+            =hoZ8
+            -----END PGP MESSAGE-----
+          fp: 129994A38E40322EE2A4FA6CB59C51DA13B1BF22
+    encrypted_regex: ^(host|hosts|ORDER_QUEUE_USERNAME|ORDER_QUEUE_PASSWORD|AZURE_OPENAI_DEPLOYMENT_NAME|AZURE_OPENAI_ENDPOINT|OPENAI_API_KEY)$
+    version: 3.7.3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: makeline-service
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: makeline-service
+    template:
+        metadata:
+            labels:
+                app: makeline-service
+        spec:
+            nodeSelector:
+                kubernetes.io/os: linux
+            containers:
+                - name: makeline-service
+                  image: ghcr.io/huangyingting/store/makeline-service:latest
+                  imagePullPolicy: Always
+                  ports:
+                    - containerPort: 3001
+                  env:
+                    - name: ORDER_QUEUE_URI
+                      value: amqp://rabbitmq.rabbitmq:5672
+                    - name: ORDER_QUEUE_USERNAME
+                      value: rabbitmq
+                    - name: ORDER_QUEUE_PASSWORD
+                      value: P@ssw0rd
+                    - name: ORDER_QUEUE_NAME
+                      value: orders
+                    - name: ORDER_DB_URI
+                      value: mongodb://mongodb.mongodb:27017
+                    - name: ORDER_DB_USERNAME
+                      value: store
+                    - name: ORDER_DB_PASSWORD
+                      value: P@ssw0rd
+                    - name: ORDER_DB_NAME
+                      value: orderdb
+                    - name: ORDER_DB_COLLECTION_NAME
+                      value: orders
+                  resources:
+                    requests:
+                        cpu: 10m
+                        memory: 64Mi
+                    limits:
+                        cpu: 20m
+                        memory: 128Mi
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2023-09-28T09:21:23Z"
+    mac: ENC[AES256_GCM,data:O3gMM1zuojbl7FnJZv/odIf9yRXbod5BXZiluUQUL+LVfC4NsPozYXHFfkwpkXZXcbBtIDr3eUiQ52pcKnX+LOqE3JWuYaLEl+UqisLpL0ryQcSwhCTAQwcrNZ+K9FtzyhtBuBfgdagp8lkrEzo1MTJOUPNVfZriEcsXjr4r1fA=,iv:pkYf45ju8xN/0HJi6SqpjaFsjYURajV/bMogPhmmbuY=,tag:llqo6i709Go9z2FEz9vLAw==,type:str]
+    pgp:
+        - created_at: "2023-09-28T09:21:22Z"
+          enc: |
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMA38T7Az157GMARAAnh6jdTJ6Dyv6wU/YhKLsMOcoGEUTXO9KMZIvtQVTz6l8
+            y5Bz4P2tt4AumPFvGf34Pkh6r0j/jf18Z00TRc35SQcxNZnh4B11XvrPlDdWQaY0
+            gWwdiLlUaPqZttpp1WsPrcTBxFRO1kMwu+UsPhhZBtOpC3KQ3wbohsJ0QmhaNxil
+            ZHotvvw7cX5l9jbGC4qw0a9M6mfY5FhGRFHS11Tf7Ve3WiPlKSz5R3mh4ZMlcxVk
+            uE7Jqldw0alhqoJ7AxIR8ZJ5fslUml5KrXn5WHdx3BhgjkiFeYwcnwknbISNhQcy
+            lZ/Kr1ioaHlD9lg+E0rQKP1VAmEYIxZKxeYhJPtnDv6UPxrGAUm2TcAKv2Np7O2M
+            gki45eJiUu1qDHJq5VoGFeDaKzXCoavXLO9r9AmtcfgnKUIJolGP4fjzM3Wt3Cyv
+            qf72Nnxe17OCwHPrFpwm/2HHJULjv0SJj0mLiF4pYlzhL3Ao7SHVM9wqJQrfTSGD
+            n4PmPxomDKRMzP+lodcO2unGdhqksno3bybaWf4Wc2qy6OT2IyfoWHQzZBULPCUr
+            /BGjund2g4+3fCHYd52PKXwZs3oEw07BbJc/I9oiFZYa8Nv81TTEVrRllS0gTAGL
+            rRcVpnL4gaapdM3T1sBmZ0u/3CVecS1U5TDIWqycBMetYH4y3I0PLilEa+uXknzS
+            XAETRHUb+sdrRl/NT3gVw2TC8+R6/fM5FozeJDn910hLDUabRvpwRrzcTzyG0dpC
+            oRyj6q18eEC/MifRVG0NbslVCBwg69e3XLtwpJ0awatTO2CzdsfPXmzXdezs
+            =hoZ8
+            -----END PGP MESSAGE-----
+          fp: 129994A38E40322EE2A4FA6CB59C51DA13B1BF22
+    encrypted_regex: ^(host|hosts|ORDER_QUEUE_USERNAME|ORDER_QUEUE_PASSWORD|AZURE_OPENAI_DEPLOYMENT_NAME|AZURE_OPENAI_ENDPOINT|OPENAI_API_KEY)$
+    version: 3.7.3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: product-service
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: product-service
+    template:
+        metadata:
+            labels:
+                app: product-service
+        spec:
+            nodeSelector:
+                kubernetes.io/os: linux
+            containers:
+                - name: product-service
+                  image: ghcr.io/huangyingting/store/product-service:latest
+                  imagePullPolicy: Always
+                  ports:
+                    - containerPort: 3002
+                  resources:
+                    requests:
+                        cpu: 10m
+                        memory: 64Mi
+                    limits:
+                        cpu: 20m
+                        memory: 128Mi
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2023-09-28T09:21:23Z"
+    mac: ENC[AES256_GCM,data:O3gMM1zuojbl7FnJZv/odIf9yRXbod5BXZiluUQUL+LVfC4NsPozYXHFfkwpkXZXcbBtIDr3eUiQ52pcKnX+LOqE3JWuYaLEl+UqisLpL0ryQcSwhCTAQwcrNZ+K9FtzyhtBuBfgdagp8lkrEzo1MTJOUPNVfZriEcsXjr4r1fA=,iv:pkYf45ju8xN/0HJi6SqpjaFsjYURajV/bMogPhmmbuY=,tag:llqo6i709Go9z2FEz9vLAw==,type:str]
+    pgp:
+        - created_at: "2023-09-28T09:21:22Z"
+          enc: |
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMA38T7Az157GMARAAnh6jdTJ6Dyv6wU/YhKLsMOcoGEUTXO9KMZIvtQVTz6l8
+            y5Bz4P2tt4AumPFvGf34Pkh6r0j/jf18Z00TRc35SQcxNZnh4B11XvrPlDdWQaY0
+            gWwdiLlUaPqZttpp1WsPrcTBxFRO1kMwu+UsPhhZBtOpC3KQ3wbohsJ0QmhaNxil
+            ZHotvvw7cX5l9jbGC4qw0a9M6mfY5FhGRFHS11Tf7Ve3WiPlKSz5R3mh4ZMlcxVk
+            uE7Jqldw0alhqoJ7AxIR8ZJ5fslUml5KrXn5WHdx3BhgjkiFeYwcnwknbISNhQcy
+            lZ/Kr1ioaHlD9lg+E0rQKP1VAmEYIxZKxeYhJPtnDv6UPxrGAUm2TcAKv2Np7O2M
+            gki45eJiUu1qDHJq5VoGFeDaKzXCoavXLO9r9AmtcfgnKUIJolGP4fjzM3Wt3Cyv
+            qf72Nnxe17OCwHPrFpwm/2HHJULjv0SJj0mLiF4pYlzhL3Ao7SHVM9wqJQrfTSGD
+            n4PmPxomDKRMzP+lodcO2unGdhqksno3bybaWf4Wc2qy6OT2IyfoWHQzZBULPCUr
+            /BGjund2g4+3fCHYd52PKXwZs3oEw07BbJc/I9oiFZYa8Nv81TTEVrRllS0gTAGL
+            rRcVpnL4gaapdM3T1sBmZ0u/3CVecS1U5TDIWqycBMetYH4y3I0PLilEa+uXknzS
+            XAETRHUb+sdrRl/NT3gVw2TC8+R6/fM5FozeJDn910hLDUabRvpwRrzcTzyG0dpC
+            oRyj6q18eEC/MifRVG0NbslVCBwg69e3XLtwpJ0awatTO2CzdsfPXmzXdezs
+            =hoZ8
+            -----END PGP MESSAGE-----
+          fp: 129994A38E40322EE2A4FA6CB59C51DA13B1BF22
+    encrypted_regex: ^(host|hosts|ORDER_QUEUE_USERNAME|ORDER_QUEUE_PASSWORD|AZURE_OPENAI_DEPLOYMENT_NAME|AZURE_OPENAI_ENDPOINT|OPENAI_API_KEY)$
+    version: 3.7.3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: store-front
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: store-front
+    template:
+        metadata:
+            labels:
+                app: store-front
+        spec:
+            nodeSelector:
+                kubernetes.io/os: linux
+            containers:
+                - name: store-front
+                  image: ghcr.io/huangyingting/store/store-front:latest
+                  imagePullPolicy: Always
+                  ports:
+                    - containerPort: 8080
+                      name: store-front
+                  env:
+                    - name: VUE_APP_ORDER_SERVICE_URL
+                      value: http://order-service:3000/
+                    - name: VUE_APP_PRODUCT_SERVICE_URL
+                      value: http://product-service:3002/
+                  resources:
+                    requests:
+                        cpu: 10m
+                        memory: 64Mi
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2023-09-28T09:21:23Z"
+    mac: ENC[AES256_GCM,data:O3gMM1zuojbl7FnJZv/odIf9yRXbod5BXZiluUQUL+LVfC4NsPozYXHFfkwpkXZXcbBtIDr3eUiQ52pcKnX+LOqE3JWuYaLEl+UqisLpL0ryQcSwhCTAQwcrNZ+K9FtzyhtBuBfgdagp8lkrEzo1MTJOUPNVfZriEcsXjr4r1fA=,iv:pkYf45ju8xN/0HJi6SqpjaFsjYURajV/bMogPhmmbuY=,tag:llqo6i709Go9z2FEz9vLAw==,type:str]
+    pgp:
+        - created_at: "2023-09-28T09:21:22Z"
+          enc: |
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMA38T7Az157GMARAAnh6jdTJ6Dyv6wU/YhKLsMOcoGEUTXO9KMZIvtQVTz6l8
+            y5Bz4P2tt4AumPFvGf34Pkh6r0j/jf18Z00TRc35SQcxNZnh4B11XvrPlDdWQaY0
+            gWwdiLlUaPqZttpp1WsPrcTBxFRO1kMwu+UsPhhZBtOpC3KQ3wbohsJ0QmhaNxil
+            ZHotvvw7cX5l9jbGC4qw0a9M6mfY5FhGRFHS11Tf7Ve3WiPlKSz5R3mh4ZMlcxVk
+            uE7Jqldw0alhqoJ7AxIR8ZJ5fslUml5KrXn5WHdx3BhgjkiFeYwcnwknbISNhQcy
+            lZ/Kr1ioaHlD9lg+E0rQKP1VAmEYIxZKxeYhJPtnDv6UPxrGAUm2TcAKv2Np7O2M
+            gki45eJiUu1qDHJq5VoGFeDaKzXCoavXLO9r9AmtcfgnKUIJolGP4fjzM3Wt3Cyv
+            qf72Nnxe17OCwHPrFpwm/2HHJULjv0SJj0mLiF4pYlzhL3Ao7SHVM9wqJQrfTSGD
+            n4PmPxomDKRMzP+lodcO2unGdhqksno3bybaWf4Wc2qy6OT2IyfoWHQzZBULPCUr
+            /BGjund2g4+3fCHYd52PKXwZs3oEw07BbJc/I9oiFZYa8Nv81TTEVrRllS0gTAGL
+            rRcVpnL4gaapdM3T1sBmZ0u/3CVecS1U5TDIWqycBMetYH4y3I0PLilEa+uXknzS
+            XAETRHUb+sdrRl/NT3gVw2TC8+R6/fM5FozeJDn910hLDUabRvpwRrzcTzyG0dpC
+            oRyj6q18eEC/MifRVG0NbslVCBwg69e3XLtwpJ0awatTO2CzdsfPXmzXdezs
+            =hoZ8
+            -----END PGP MESSAGE-----
+          fp: 129994A38E40322EE2A4FA6CB59C51DA13B1BF22
+    encrypted_regex: ^(host|hosts|ORDER_QUEUE_USERNAME|ORDER_QUEUE_PASSWORD|AZURE_OPENAI_DEPLOYMENT_NAME|AZURE_OPENAI_ENDPOINT|OPENAI_API_KEY)$
+    version: 3.7.3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: store-admin
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: store-admin
+    template:
+        metadata:
+            labels:
+                app: store-admin
+        spec:
+            nodeSelector:
+                kubernetes.io/os: linux
+            containers:
+                - name: store-admin
+                  image: ghcr.io/huangyingting/store/store-admin:latest
+                  imagePullPolicy: Always
+                  command:
+                    - npm
+                  args:
+                    - run
+                    - serve
+                    - -s
+                  ports:
+                    - containerPort: 8081
+                      name: store-admin
+                  env:
+                    - name: VUE_APP_PRODUCT_SERVICE_URL
+                      value: http://product-service:3002/
+                    - name: VUE_APP_MAKELINE_SERVICE_URL
+                      value: http://makeline-service:3001/
+                    - name: VUE_APP_AI_SERVICE_URL
+                      value: http://ai-service:5001/
+                  resources:
+                    requests:
+                        cpu: 10m
+                        memory: 64Mi
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2023-09-28T09:21:23Z"
+    mac: ENC[AES256_GCM,data:O3gMM1zuojbl7FnJZv/odIf9yRXbod5BXZiluUQUL+LVfC4NsPozYXHFfkwpkXZXcbBtIDr3eUiQ52pcKnX+LOqE3JWuYaLEl+UqisLpL0ryQcSwhCTAQwcrNZ+K9FtzyhtBuBfgdagp8lkrEzo1MTJOUPNVfZriEcsXjr4r1fA=,iv:pkYf45ju8xN/0HJi6SqpjaFsjYURajV/bMogPhmmbuY=,tag:llqo6i709Go9z2FEz9vLAw==,type:str]
+    pgp:
+        - created_at: "2023-09-28T09:21:22Z"
+          enc: |
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMA38T7Az157GMARAAnh6jdTJ6Dyv6wU/YhKLsMOcoGEUTXO9KMZIvtQVTz6l8
+            y5Bz4P2tt4AumPFvGf34Pkh6r0j/jf18Z00TRc35SQcxNZnh4B11XvrPlDdWQaY0
+            gWwdiLlUaPqZttpp1WsPrcTBxFRO1kMwu+UsPhhZBtOpC3KQ3wbohsJ0QmhaNxil
+            ZHotvvw7cX5l9jbGC4qw0a9M6mfY5FhGRFHS11Tf7Ve3WiPlKSz5R3mh4ZMlcxVk
+            uE7Jqldw0alhqoJ7AxIR8ZJ5fslUml5KrXn5WHdx3BhgjkiFeYwcnwknbISNhQcy
+            lZ/Kr1ioaHlD9lg+E0rQKP1VAmEYIxZKxeYhJPtnDv6UPxrGAUm2TcAKv2Np7O2M
+            gki45eJiUu1qDHJq5VoGFeDaKzXCoavXLO9r9AmtcfgnKUIJolGP4fjzM3Wt3Cyv
+            qf72Nnxe17OCwHPrFpwm/2HHJULjv0SJj0mLiF4pYlzhL3Ao7SHVM9wqJQrfTSGD
+            n4PmPxomDKRMzP+lodcO2unGdhqksno3bybaWf4Wc2qy6OT2IyfoWHQzZBULPCUr
+            /BGjund2g4+3fCHYd52PKXwZs3oEw07BbJc/I9oiFZYa8Nv81TTEVrRllS0gTAGL
+            rRcVpnL4gaapdM3T1sBmZ0u/3CVecS1U5TDIWqycBMetYH4y3I0PLilEa+uXknzS
+            XAETRHUb+sdrRl/NT3gVw2TC8+R6/fM5FozeJDn910hLDUabRvpwRrzcTzyG0dpC
+            oRyj6q18eEC/MifRVG0NbslVCBwg69e3XLtwpJ0awatTO2CzdsfPXmzXdezs
+            =hoZ8
+            -----END PGP MESSAGE-----
+          fp: 129994A38E40322EE2A4FA6CB59C51DA13B1BF22
+    encrypted_regex: ^(host|hosts|ORDER_QUEUE_USERNAME|ORDER_QUEUE_PASSWORD|AZURE_OPENAI_DEPLOYMENT_NAME|AZURE_OPENAI_ENDPOINT|OPENAI_API_KEY)$
+    version: 3.7.3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: virtual-customer
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: virtual-customer
+    template:
+        metadata:
+            labels:
+                app: virtual-customer
+        spec:
+            nodeSelector:
+                kubernetes.io/os: linux
+            containers:
+                - name: virtual-customer
+                  image: ghcr.io/huangyingting/store/virtual-customer:latest
+                  imagePullPolicy: Always
+                  env:
+                    - name: ORDER_SERVICE_URL
+                      value: http://order-service:3000/
+                    - name: ORDERS_PER_HOUR
+                      value: "100"
+                  resources:
+                    requests:
+                        cpu: 10m
+                        memory: 64Mi
+                    limits:
+                        cpu: 20m
+                        memory: 128Mi
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2023-09-28T09:21:23Z"
+    mac: ENC[AES256_GCM,data:O3gMM1zuojbl7FnJZv/odIf9yRXbod5BXZiluUQUL+LVfC4NsPozYXHFfkwpkXZXcbBtIDr3eUiQ52pcKnX+LOqE3JWuYaLEl+UqisLpL0ryQcSwhCTAQwcrNZ+K9FtzyhtBuBfgdagp8lkrEzo1MTJOUPNVfZriEcsXjr4r1fA=,iv:pkYf45ju8xN/0HJi6SqpjaFsjYURajV/bMogPhmmbuY=,tag:llqo6i709Go9z2FEz9vLAw==,type:str]
+    pgp:
+        - created_at: "2023-09-28T09:21:22Z"
+          enc: |
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMA38T7Az157GMARAAnh6jdTJ6Dyv6wU/YhKLsMOcoGEUTXO9KMZIvtQVTz6l8
+            y5Bz4P2tt4AumPFvGf34Pkh6r0j/jf18Z00TRc35SQcxNZnh4B11XvrPlDdWQaY0
+            gWwdiLlUaPqZttpp1WsPrcTBxFRO1kMwu+UsPhhZBtOpC3KQ3wbohsJ0QmhaNxil
+            ZHotvvw7cX5l9jbGC4qw0a9M6mfY5FhGRFHS11Tf7Ve3WiPlKSz5R3mh4ZMlcxVk
+            uE7Jqldw0alhqoJ7AxIR8ZJ5fslUml5KrXn5WHdx3BhgjkiFeYwcnwknbISNhQcy
+            lZ/Kr1ioaHlD9lg+E0rQKP1VAmEYIxZKxeYhJPtnDv6UPxrGAUm2TcAKv2Np7O2M
+            gki45eJiUu1qDHJq5VoGFeDaKzXCoavXLO9r9AmtcfgnKUIJolGP4fjzM3Wt3Cyv
+            qf72Nnxe17OCwHPrFpwm/2HHJULjv0SJj0mLiF4pYlzhL3Ao7SHVM9wqJQrfTSGD
+            n4PmPxomDKRMzP+lodcO2unGdhqksno3bybaWf4Wc2qy6OT2IyfoWHQzZBULPCUr
+            /BGjund2g4+3fCHYd52PKXwZs3oEw07BbJc/I9oiFZYa8Nv81TTEVrRllS0gTAGL
+            rRcVpnL4gaapdM3T1sBmZ0u/3CVecS1U5TDIWqycBMetYH4y3I0PLilEa+uXknzS
+            XAETRHUb+sdrRl/NT3gVw2TC8+R6/fM5FozeJDn910hLDUabRvpwRrzcTzyG0dpC
+            oRyj6q18eEC/MifRVG0NbslVCBwg69e3XLtwpJ0awatTO2CzdsfPXmzXdezs
+            =hoZ8
+            -----END PGP MESSAGE-----
+          fp: 129994A38E40322EE2A4FA6CB59C51DA13B1BF22
+    encrypted_regex: ^(host|hosts|ORDER_QUEUE_USERNAME|ORDER_QUEUE_PASSWORD|AZURE_OPENAI_DEPLOYMENT_NAME|AZURE_OPENAI_ENDPOINT|OPENAI_API_KEY)$
+    version: 3.7.3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: virtual-worker
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: virtual-worker
+    template:
+        metadata:
+            labels:
+                app: virtual-worker
+        spec:
+            nodeSelector:
+                kubernetes.io/os: linux
+            containers:
+                - name: virtual-worker
+                  image: ghcr.io/huangyingting/store/virtual-worker:latest
+                  imagePullPolicy: Always
+                  env:
+                    - name: MAKELINE_SERVICE_URL
+                      value: http://makeline-service:3001
+                    - name: ORDERS_PER_HOUR
+                      value: "100"
+                    - name: RUST_BACKTRACE
+                      value: "1"
+                  resources:
+                    requests:
+                        cpu: 10m
+                        memory: 64Mi
+                    limits:
+                        cpu: 20m
+                        memory: 128Mi
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2023-09-28T09:21:23Z"
+    mac: ENC[AES256_GCM,data:O3gMM1zuojbl7FnJZv/odIf9yRXbod5BXZiluUQUL+LVfC4NsPozYXHFfkwpkXZXcbBtIDr3eUiQ52pcKnX+LOqE3JWuYaLEl+UqisLpL0ryQcSwhCTAQwcrNZ+K9FtzyhtBuBfgdagp8lkrEzo1MTJOUPNVfZriEcsXjr4r1fA=,iv:pkYf45ju8xN/0HJi6SqpjaFsjYURajV/bMogPhmmbuY=,tag:llqo6i709Go9z2FEz9vLAw==,type:str]
+    pgp:
+        - created_at: "2023-09-28T09:21:22Z"
+          enc: |
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMA38T7Az157GMARAAnh6jdTJ6Dyv6wU/YhKLsMOcoGEUTXO9KMZIvtQVTz6l8
+            y5Bz4P2tt4AumPFvGf34Pkh6r0j/jf18Z00TRc35SQcxNZnh4B11XvrPlDdWQaY0
+            gWwdiLlUaPqZttpp1WsPrcTBxFRO1kMwu+UsPhhZBtOpC3KQ3wbohsJ0QmhaNxil
+            ZHotvvw7cX5l9jbGC4qw0a9M6mfY5FhGRFHS11Tf7Ve3WiPlKSz5R3mh4ZMlcxVk
+            uE7Jqldw0alhqoJ7AxIR8ZJ5fslUml5KrXn5WHdx3BhgjkiFeYwcnwknbISNhQcy
+            lZ/Kr1ioaHlD9lg+E0rQKP1VAmEYIxZKxeYhJPtnDv6UPxrGAUm2TcAKv2Np7O2M
+            gki45eJiUu1qDHJq5VoGFeDaKzXCoavXLO9r9AmtcfgnKUIJolGP4fjzM3Wt3Cyv
+            qf72Nnxe17OCwHPrFpwm/2HHJULjv0SJj0mLiF4pYlzhL3Ao7SHVM9wqJQrfTSGD
+            n4PmPxomDKRMzP+lodcO2unGdhqksno3bybaWf4Wc2qy6OT2IyfoWHQzZBULPCUr
+            /BGjund2g4+3fCHYd52PKXwZs3oEw07BbJc/I9oiFZYa8Nv81TTEVrRllS0gTAGL
+            rRcVpnL4gaapdM3T1sBmZ0u/3CVecS1U5TDIWqycBMetYH4y3I0PLilEa+uXknzS
+            XAETRHUb+sdrRl/NT3gVw2TC8+R6/fM5FozeJDn910hLDUabRvpwRrzcTzyG0dpC
+            oRyj6q18eEC/MifRVG0NbslVCBwg69e3XLtwpJ0awatTO2CzdsfPXmzXdezs
+            =hoZ8
+            -----END PGP MESSAGE-----
+          fp: 129994A38E40322EE2A4FA6CB59C51DA13B1BF22
+    encrypted_regex: ^(host|hosts|ORDER_QUEUE_USERNAME|ORDER_QUEUE_PASSWORD|AZURE_OPENAI_DEPLOYMENT_NAME|AZURE_OPENAI_ENDPOINT|OPENAI_API_KEY)$
+    version: 3.7.3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: ai-service
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: ai-service
+    template:
+        metadata:
+            labels:
+                app: ai-service
+        spec:
+            nodeSelector:
+                kubernetes.io/os: linux
+            containers:
+                - name: order-service
+                  image: ghcr.io/huangyingting/store/ai-service:latest
+                  imagePullPolicy: Always
+                  ports:
+                    - containerPort: 5001
+                  env:
+                    # set to True for Azure OpenAI, False for Public OpenAI
+                    - name: USE_AZURE_OPENAI
+                      value: "True"
+                    # required if using Azure OpenAI
+                    - name: AZURE_OPENAI_DEPLOYMENT_NAME
+                      value: gpt-35-turbo
+                    # required if using Azure OpenAI
+                    - name: AZURE_OPENAI_ENDPOINT
+                      value: https://openaije.openai.azure.com/
+                    # always required
+                    - name: OPENAI_API_KEY
+                      value: 0f8ef3f41d8845aca7a1e9d6df77ebd1
+                  resources:
+                    requests:
+                        cpu: 20m
+                        memory: 50Mi
+                    limits:
+                        cpu: 30m
+                        memory: 65Mi
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2023-09-28T09:21:23Z"
+    mac: ENC[AES256_GCM,data:O3gMM1zuojbl7FnJZv/odIf9yRXbod5BXZiluUQUL+LVfC4NsPozYXHFfkwpkXZXcbBtIDr3eUiQ52pcKnX+LOqE3JWuYaLEl+UqisLpL0ryQcSwhCTAQwcrNZ+K9FtzyhtBuBfgdagp8lkrEzo1MTJOUPNVfZriEcsXjr4r1fA=,iv:pkYf45ju8xN/0HJi6SqpjaFsjYURajV/bMogPhmmbuY=,tag:llqo6i709Go9z2FEz9vLAw==,type:str]
+    pgp:
+        - created_at: "2023-09-28T09:21:22Z"
+          enc: |
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMA38T7Az157GMARAAnh6jdTJ6Dyv6wU/YhKLsMOcoGEUTXO9KMZIvtQVTz6l8
+            y5Bz4P2tt4AumPFvGf34Pkh6r0j/jf18Z00TRc35SQcxNZnh4B11XvrPlDdWQaY0
+            gWwdiLlUaPqZttpp1WsPrcTBxFRO1kMwu+UsPhhZBtOpC3KQ3wbohsJ0QmhaNxil
+            ZHotvvw7cX5l9jbGC4qw0a9M6mfY5FhGRFHS11Tf7Ve3WiPlKSz5R3mh4ZMlcxVk
+            uE7Jqldw0alhqoJ7AxIR8ZJ5fslUml5KrXn5WHdx3BhgjkiFeYwcnwknbISNhQcy
+            lZ/Kr1ioaHlD9lg+E0rQKP1VAmEYIxZKxeYhJPtnDv6UPxrGAUm2TcAKv2Np7O2M
+            gki45eJiUu1qDHJq5VoGFeDaKzXCoavXLO9r9AmtcfgnKUIJolGP4fjzM3Wt3Cyv
+            qf72Nnxe17OCwHPrFpwm/2HHJULjv0SJj0mLiF4pYlzhL3Ao7SHVM9wqJQrfTSGD
+            n4PmPxomDKRMzP+lodcO2unGdhqksno3bybaWf4Wc2qy6OT2IyfoWHQzZBULPCUr
+            /BGjund2g4+3fCHYd52PKXwZs3oEw07BbJc/I9oiFZYa8Nv81TTEVrRllS0gTAGL
+            rRcVpnL4gaapdM3T1sBmZ0u/3CVecS1U5TDIWqycBMetYH4y3I0PLilEa+uXknzS
+            XAETRHUb+sdrRl/NT3gVw2TC8+R6/fM5FozeJDn910hLDUabRvpwRrzcTzyG0dpC
+            oRyj6q18eEC/MifRVG0NbslVCBwg69e3XLtwpJ0awatTO2CzdsfPXmzXdezs
+            =hoZ8
+            -----END PGP MESSAGE-----
+          fp: 129994A38E40322EE2A4FA6CB59C51DA13B1BF22
+    encrypted_regex: ^(host|hosts|ORDER_QUEUE_USERNAME|ORDER_QUEUE_PASSWORD|AZURE_OPENAI_DEPLOYMENT_NAME|AZURE_OPENAI_ENDPOINT|OPENAI_API_KEY)$
+    version: 3.7.3

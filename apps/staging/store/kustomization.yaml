@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: store
+bases:
+  - ../../base/store
+patchesStrategicMerge:
+  - deployment.enc.yaml
+  - ingress.enc.yaml
+replicas:
+- name: order-service
+  count: 0
+- name: makeline-service
+  count: 0
+- name: product-service
+  count: 0
+- name: store-front
+  count: 0
+- name: store-admin
+  count: 0
+- name: virtual-customer
+  count: 0
+- name: virtual-worker
+  count: 0
+- name: ai-service
+  count: 0

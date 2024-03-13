@@ -1,0 +1,164 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+    name: chat-copilot-webapp
+spec:
+    ingressClassName: nginx
+    rules:
+        - host: ENC[AES256_GCM,data:k3NCbx/W5FakbcYxrk5VB8kGMwGdqE3jZzX8gbZ4YODQ0GI=,iv:309gnPyGt704BeuWm6ZcWbr4A42cy2bEmGhpaBkA1Zg=,tag:Dj6GPI7wO72g2b9VY5TRQw==,type:str]
+          http:
+            paths:
+                - backend:
+                    service:
+                        name: chat-copilot-webapp
+                        port:
+                            number: 3000
+                  path: /
+                  pathType: ImplementationSpecific
+    tls:
+        - hosts:
+            - ENC[AES256_GCM,data:FKuFOW4TXwyC9f0hQfIxgSU5XOaJ1Js4e0ARBrjW5bHmOfM=,iv:i+NrAH6B4rwZ5PeDK4HpZ2BpDOBS0FkPUGbtoSFGayE=,tag:dZnU6ey+I4ZzvGX7l9z35g==,type:str]
+          secretName: chat-copilot-webapp-tls
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2023-10-16T07:05:54Z"
+    mac: ENC[AES256_GCM,data:m0m4ITRdj7igRCbHL3YHTjxcihLFHoMGf+Kxy0rS1HtGOgX9FSgNNPPqNEGpERLRStfwr+rlbwCeS39V41BLu+x4sRpQc3rQtH8F1OsPS2yMEigB8G35qclHXoMXxcZp4O/z0/V2nt+Ef+hH73DXUufewci8EZHkYZzoMVOWiWE=,iv:2Jd3lJL2RrJbvxjSVzUCIhN/vaAVWbpofVYjFEAeZRQ=,tag:Fb2UcUQ63TceyjCKacZRXw==,type:str]
+    pgp:
+        - created_at: "2023-10-16T07:05:53Z"
+          enc: |
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMA38T7Az157GMAQ/7BqvHkjSQyab3Z24HtttTfhCco5q2SGt1BxfSWGb9W7fV
+            GLnMRH0U1DULNV8Q5u8z3uatsizLZv/VY1y7u1H3jT3GbF3SEKTIorAMpzz9ucvQ
+            S0w3yrym62bdJ2aKhTxzx7JgEx6Ozilho09/BpnIdiTusMK18MM93AeNf18gPiBD
+            NNhpY1zp2YKmZwE/lCUeDwFNEByP1dMkaoJyNaHxXRDo68MiQdfcC/EklgKx1HLl
+            L8+Uf6V97PXt+NVdJ0zwE9+gUqs5oqK5GNWuR8YenUswUIn0Bz9ZSBCg/WDf01SJ
+            oYdyEDPfqv5DMXHG/HVPNpR3b3mAOLKp3Hmgu8PhZPsPOaeuK4UL4VQXpUTLJzMe
+            sPpHGCWOzOh6bXdO/A0ZshaBT5jkEo6iFjTFT/v1dRpp5QMjCfzWEAMmG9DF7YZj
+            S7t/eihqhSDvq7KSYd3+uEvo+04p0cGoHsg2O1XJgfawbvznXNaU1qSIgaxq5y3z
+            MZcPfsuq3gPJ/fkgoBEDk++kZ2kPYN1sMbOKtVdE4VIyOrLx9fRhQVYNc5hy9qv8
+            IjdGppU9wXF4I5dlbs5SGoH01vIJX4djhaH7gyBCX1s/PEYRB16WvSATvkWFZGZg
+            RPFQen1GfqEJ9LVEAvd7ZFuQ7JWsXCkkc/P066B/a6dR2zbG7nm7ppWV+HldQXPS
+            XgEN4n6QbDAYPUBxsk3aVE8qJ2r+Ubv1HvcIKmpTqb2czNpsl0Yuf1QC+lTvYWS7
+            0YCFK+tPMQaLRTL+S2ZqEA+mM9y4IcQS61Z8KtnSzkUwPXwnFnTCmtWhzcjadFI=
+            =fU+o
+            -----END PGP MESSAGE-----
+          fp: 129994A38E40322EE2A4FA6CB59C51DA13B1BF22
+    encrypted_regex: ^(value|host|hosts)$
+    version: 3.7.3
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+    name: chat-copilot-webapi
+spec:
+    ingressClassName: nginx
+    rules:
+        - host: ENC[AES256_GCM,data:iErB4Ny0aSi9wXC3cy848H/+bB8Pb5htRNRQT/TxxXYQ/gU=,iv:SFcivOaxDa4SVdfz6KuHyh5+BdG2ueOye5jFlZ7cEC8=,tag:+soeiKHaYkmLedsZ54wXWA==,type:str]
+          http:
+            paths:
+                - backend:
+                    service:
+                        name: chat-copilot-webapi
+                        port:
+                            number: 8080
+                  path: /
+                  pathType: ImplementationSpecific
+    tls:
+        - hosts:
+            - ENC[AES256_GCM,data:A249TMCZurL7uZN/apTj0zBUA+yIistL0quHWr8uxCEZMjw=,iv:eZDXlPKQL1XQqoLsUxl64jEOYXMBDgRDFe81uhtA77w=,tag:VTbOtIjXZRqxEQiPKLKt/g==,type:str]
+          secretName: chat-copilot-webapi-tls
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2023-10-16T07:05:54Z"
+    mac: ENC[AES256_GCM,data:m0m4ITRdj7igRCbHL3YHTjxcihLFHoMGf+Kxy0rS1HtGOgX9FSgNNPPqNEGpERLRStfwr+rlbwCeS39V41BLu+x4sRpQc3rQtH8F1OsPS2yMEigB8G35qclHXoMXxcZp4O/z0/V2nt+Ef+hH73DXUufewci8EZHkYZzoMVOWiWE=,iv:2Jd3lJL2RrJbvxjSVzUCIhN/vaAVWbpofVYjFEAeZRQ=,tag:Fb2UcUQ63TceyjCKacZRXw==,type:str]
+    pgp:
+        - created_at: "2023-10-16T07:05:53Z"
+          enc: |
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMA38T7Az157GMAQ/7BqvHkjSQyab3Z24HtttTfhCco5q2SGt1BxfSWGb9W7fV
+            GLnMRH0U1DULNV8Q5u8z3uatsizLZv/VY1y7u1H3jT3GbF3SEKTIorAMpzz9ucvQ
+            S0w3yrym62bdJ2aKhTxzx7JgEx6Ozilho09/BpnIdiTusMK18MM93AeNf18gPiBD
+            NNhpY1zp2YKmZwE/lCUeDwFNEByP1dMkaoJyNaHxXRDo68MiQdfcC/EklgKx1HLl
+            L8+Uf6V97PXt+NVdJ0zwE9+gUqs5oqK5GNWuR8YenUswUIn0Bz9ZSBCg/WDf01SJ
+            oYdyEDPfqv5DMXHG/HVPNpR3b3mAOLKp3Hmgu8PhZPsPOaeuK4UL4VQXpUTLJzMe
+            sPpHGCWOzOh6bXdO/A0ZshaBT5jkEo6iFjTFT/v1dRpp5QMjCfzWEAMmG9DF7YZj
+            S7t/eihqhSDvq7KSYd3+uEvo+04p0cGoHsg2O1XJgfawbvznXNaU1qSIgaxq5y3z
+            MZcPfsuq3gPJ/fkgoBEDk++kZ2kPYN1sMbOKtVdE4VIyOrLx9fRhQVYNc5hy9qv8
+            IjdGppU9wXF4I5dlbs5SGoH01vIJX4djhaH7gyBCX1s/PEYRB16WvSATvkWFZGZg
+            RPFQen1GfqEJ9LVEAvd7ZFuQ7JWsXCkkc/P066B/a6dR2zbG7nm7ppWV+HldQXPS
+            XgEN4n6QbDAYPUBxsk3aVE8qJ2r+Ubv1HvcIKmpTqb2czNpsl0Yuf1QC+lTvYWS7
+            0YCFK+tPMQaLRTL+S2ZqEA+mM9y4IcQS61Z8KtnSzkUwPXwnFnTCmtWhzcjadFI=
+            =fU+o
+            -----END PGP MESSAGE-----
+          fp: 129994A38E40322EE2A4FA6CB59C51DA13B1BF22
+    encrypted_regex: ^(value|host|hosts)$
+    version: 3.7.3
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+    name: chat-copilot-web-searcher
+spec:
+    ingressClassName: nginx
+    rules:
+        - host: ENC[AES256_GCM,data:fR861ryeDB8biF+BCD9NZbg512k2n6HDCM3PMT1GqoXTCmm6vJdMj5w=,iv:CQGF7T5kaVJCfcesfFzZqBuc7q1gnQCMikDSALAkhRc=,tag:sVVmPL51Hxb8ZYHW4InfLg==,type:str]
+          http:
+            paths:
+                - backend:
+                    service:
+                        name: chat-copilot-web-searcher
+                        port:
+                            number: 80
+                  path: /
+                  pathType: ImplementationSpecific
+    tls:
+        - hosts:
+            - ENC[AES256_GCM,data:VMBhrDw6F2q9EQFmXj/Uy1P2uKdT1Dk7iEQ1QSRkWaaoGJVIAb5qKKc=,iv:CZKmLPJtrJ+kZcAjIeXwqoGVah0rUDzqSBXhEcNikjE=,tag:TIEzKcuo0zt6mkSvJQLnKA==,type:str]
+          secretName: chat-copilot-web-searcher-tls
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2023-10-16T07:05:54Z"
+    mac: ENC[AES256_GCM,data:m0m4ITRdj7igRCbHL3YHTjxcihLFHoMGf+Kxy0rS1HtGOgX9FSgNNPPqNEGpERLRStfwr+rlbwCeS39V41BLu+x4sRpQc3rQtH8F1OsPS2yMEigB8G35qclHXoMXxcZp4O/z0/V2nt+Ef+hH73DXUufewci8EZHkYZzoMVOWiWE=,iv:2Jd3lJL2RrJbvxjSVzUCIhN/vaAVWbpofVYjFEAeZRQ=,tag:Fb2UcUQ63TceyjCKacZRXw==,type:str]
+    pgp:
+        - created_at: "2023-10-16T07:05:53Z"
+          enc: |
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMA38T7Az157GMAQ/7BqvHkjSQyab3Z24HtttTfhCco5q2SGt1BxfSWGb9W7fV
+            GLnMRH0U1DULNV8Q5u8z3uatsizLZv/VY1y7u1H3jT3GbF3SEKTIorAMpzz9ucvQ
+            S0w3yrym62bdJ2aKhTxzx7JgEx6Ozilho09/BpnIdiTusMK18MM93AeNf18gPiBD
+            NNhpY1zp2YKmZwE/lCUeDwFNEByP1dMkaoJyNaHxXRDo68MiQdfcC/EklgKx1HLl
+            L8+Uf6V97PXt+NVdJ0zwE9+gUqs5oqK5GNWuR8YenUswUIn0Bz9ZSBCg/WDf01SJ
+            oYdyEDPfqv5DMXHG/HVPNpR3b3mAOLKp3Hmgu8PhZPsPOaeuK4UL4VQXpUTLJzMe
+            sPpHGCWOzOh6bXdO/A0ZshaBT5jkEo6iFjTFT/v1dRpp5QMjCfzWEAMmG9DF7YZj
+            S7t/eihqhSDvq7KSYd3+uEvo+04p0cGoHsg2O1XJgfawbvznXNaU1qSIgaxq5y3z
+            MZcPfsuq3gPJ/fkgoBEDk++kZ2kPYN1sMbOKtVdE4VIyOrLx9fRhQVYNc5hy9qv8
+            IjdGppU9wXF4I5dlbs5SGoH01vIJX4djhaH7gyBCX1s/PEYRB16WvSATvkWFZGZg
+            RPFQen1GfqEJ9LVEAvd7ZFuQ7JWsXCkkc/P066B/a6dR2zbG7nm7ppWV+HldQXPS
+            XgEN4n6QbDAYPUBxsk3aVE8qJ2r+Ubv1HvcIKmpTqb2czNpsl0Yuf1QC+lTvYWS7
+            0YCFK+tPMQaLRTL+S2ZqEA+mM9y4IcQS61Z8KtnSzkUwPXwnFnTCmtWhzcjadFI=
+            =fU+o
+            -----END PGP MESSAGE-----
+          fp: 129994A38E40322EE2A4FA6CB59C51DA13B1BF22
+    encrypted_regex: ^(value|host|hosts)$
+    version: 3.7.3

@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: linkerd
+resources:
+  - namespace.yaml
+  - linkerd-crds-release.yaml
+  - linkerd-control-plane-release.yaml
+secretGenerator:
+  - name: linkerd-control-plane-certs
+    files:
+      - ca.crt
+      - issuer.crt
+      - issuer.key
+  - name: linkerd-crds-values
+    files:
+      - values.yaml=linkerd-crds-values.yaml      
+configurations:
+  - kustomizeconfig.yaml

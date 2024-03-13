@@ -1,0 +1,199 @@
+# Default values
+# https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+alertmanager:
+    config:
+        route:
+            receiver: slack
+        receivers:
+            - name: "null"
+            - name: slack
+              slack_configs:
+                - api_url: ENC[AES256_GCM,data:AQIlwEXafAcSTh+0kB2Dvais4Di3t2Ba5qbLZezREDNXBEOkFLHu2zzdKgTy6dBcUgKvg+lRV4yXznBXA+zT9HishzJlZK7O7KZySlS1UlvC,iv:1hkmRy8uMduZtJPxCxtjrlRMCI7DC7gUUxmq8x7o040=,tag:zAGlVJLQi6kthsfAjZFwRg==,type:str]
+                  channel: ENC[AES256_GCM,data:N3RNmMWRww==,iv:RNKwYtiLJeL0Axp9ciW1MtWpL6m6zGXojHyrJTki1dM=,tag:uy1674NIAGY1I/zqEe1J1A==,type:str]
+                  username: ENC[AES256_GCM,data:oheNb12pBlDvHg==,iv:f+iaX7+Y2/uCTXAfNNuSvQe9MtEjOnQTpGKO2fOp/gU=,tag:30LTRGzR9iywB9frOVEIOg==,type:str]
+                  send_resolved: true
+                  title: '[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}{{ if eq .Status "resolved" }}:{{ .Alerts.Resolved | len }}{{ end }}] Monitoring Event Notification'
+                  text: "{{ range .Alerts -}}\n*Alert:* {{ .Annotations.summary }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}\n*Description:* {{ .Annotations.description }}\n*Details:*\n{{ range .Labels.SortedPairs }} - *{{ .Name }}:* `{{ .Value }}`\n{{ end }}\n{{ end }}  "
+    alertmanagerSpec:
+        retention: 24h
+grafana:
+    persistence:
+        enabled: true
+        initChownData: true
+        storageClassName: default
+        accessModes:
+            - ReadWriteOnce
+        size: 1Gi
+    ingress:
+        enabled: true
+        ingressClassName: nginx
+        annotations:
+            cert-manager.io/cluster-issuer: letsencrypt
+        hosts:
+            - ENC[AES256_GCM,data:rkf30X4Shdcqw5bWfjo9Gz4QGV0O/RI=,iv:52viOnQhDWeybKdTCVV4SgMSSP9/mj6q/218KIU04jw=,tag:F/+NB6Wqn0/BvG+8SC5btg==,type:str]
+        path: /
+        tls:
+            - secretName: grafana-tls
+              hosts:
+                - ENC[AES256_GCM,data:DTnjwMNI14vaTL3p/r22Q2VqzpEbosI=,iv:3bmyU9PWoD5zEpPiRFtzwxojPufaJvKdeVrpLGfVYFQ=,tag:wW1dTo/Dh1yI088KJv3M8A==,type:str]
+    grafana.ini:
+        server:
+            domain: ENC[AES256_GCM,data:8yst3pu8Fy+UaCue9jIUSIR5K9OSAXw=,iv:nKfSDfaGw7LrGEdfaThvoDv55rmj4mghOfGYK4mQ5gg=,tag:s6ChUxGlnp5wnZf5ePg3lw==,type:str]
+            root_url: ENC[AES256_GCM,data:uPca4piLEBLE+ta/PqAaSfpbHztEpPSeMRYbukgixFU=,iv:lz/9PfXaeYa4evWZ27JZY4mUSp69mfw66ED5Pgs4Jgo=,tag:YEij1aaLja8qR6BrM+hxyQ==,type:str]
+        auth:
+            disable_login_form: true
+            oauth_auto_login: true
+        auth.basic:
+            enabled: true
+        auth.azuread:
+            name: Azure AD
+            enabled: true
+            allow_sign_up: true
+            client_id: ENC[AES256_GCM,data:WRZAQbefc+U0DXse9NxQiwfaBEQyb4eWP9HnDY8RG+QNgfAN,iv:NJFMYwNECNYI05Z+IO2cMzkfwMF500y+trmTL+FShSQ=,tag:IET91TA7Ucd3wxqXaynodg==,type:str]
+            client_secret: ENC[AES256_GCM,data:wKzI1Coc+uQcr706emPDDI+lRr5pX8A2Dfxo7bKo31fNghKKgVefGA==,iv:W+5GLy1+3dW36pU9D1UwuaHg4cwcyIiq452JqIIxSd0=,tag:PCPAfkSo5BwX30I2Ua1FYQ==,type:str]
+            scopes: openid email profile
+            auth_url: ENC[AES256_GCM,data:EB2z/NeNnBL661QdqiaYXa16nznUh6g8yCBIgMG7iA4AnaN3+t9UcYnbks04Xof7WDuAFeqUC/8Fpa9ZTWHjVvyOxSj940hAYNgtka1QvBZ/yh1+S4qZiJvOaao=,iv:FJGdQbrsCJdbEH2e9yHqdCGpNuniCUq68X2KYzGNzgE=,tag:uvuugighnH2GccAewwrbeg==,type:str]
+            token_url: ENC[AES256_GCM,data:FKl6SjYGakzpxbWobNF9g8mmCwdZDtyEXYbHvcmiD4N+wdpeC+9qtF9whg0k+YlQWRwWXRzybI5qbrGNcLDgsm4UnA3bz8M3fdelzkFjqHmhyHue4h66QQ==,iv:H8CAk4+BeGh4KFvRzpkEicRBBCLJeWE3DHzHMPdLOGs=,tag:ryyLqFEzWaecFkIXypAXhA==,type:str]
+        analytics:
+            check_for_updates: true
+        log:
+            mode: console
+        grafana_net:
+            url: https://grafana.net
+prometheus:
+    prometheusSpec:
+        enableRemoteWriteReceiver: true
+        retention: 1d
+        enableFeatures:
+            - exemplar-storage
+        additionalScrapeConfigs:
+            - job_name: linkerd-controller
+              kubernetes_sd_configs:
+                - role: pod
+                  namespaces:
+                    names:
+                        - linkerd
+                        - linkerd-viz
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_pod_container_port_name
+                  action: keep
+                  regex: admin-http
+                - source_labels:
+                    - __meta_kubernetes_pod_container_name
+                  action: replace
+                  target_label: component
+            - job_name: linkerd-service-mirror
+              kubernetes_sd_configs:
+                - role: pod
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_pod_label_component
+                    - __meta_kubernetes_pod_container_port_name
+                  action: keep
+                  regex: linkerd-service-mirror;admin-http$
+                - source_labels:
+                    - __meta_kubernetes_pod_container_name
+                  action: replace
+                  target_label: component
+            - job_name: linkerd-proxy
+              kubernetes_sd_configs:
+                - role: pod
+              relabel_configs:
+                - source_labels:
+                    - __meta_kubernetes_pod_container_name
+                    - __meta_kubernetes_pod_container_port_name
+                    - __meta_kubernetes_pod_label_linkerd_io_control_plane_ns
+                  action: keep
+                  regex: ^linkerd-proxy;linkerd-admin;linkerd$
+                - source_labels:
+                    - __meta_kubernetes_namespace
+                  action: replace
+                  target_label: namespace
+                - source_labels:
+                    - __meta_kubernetes_pod_name
+                  action: replace
+                  target_label: pod
+                # special case k8s' "job" label, to not interfere with prometheus' "job"
+                # label
+                # __meta_kubernetes_pod_label_linkerd_io_proxy_job=foo =>
+                # k8s_job=foo
+                - source_labels:
+                    - __meta_kubernetes_pod_label_linkerd_io_proxy_job
+                  action: replace
+                  target_label: k8s_job
+                # drop __meta_kubernetes_pod_label_linkerd_io_proxy_job
+                - action: labeldrop
+                  regex: __meta_kubernetes_pod_label_linkerd_io_proxy_job
+                # __meta_kubernetes_pod_label_linkerd_io_proxy_deployment=foo =>
+                # deployment=foo
+                - action: labelmap
+                  regex: __meta_kubernetes_pod_label_linkerd_io_proxy_(.+)
+                # drop all labels that we just made copies of in the previous labelmap
+                - action: labeldrop
+                  regex: __meta_kubernetes_pod_label_linkerd_io_proxy_(.+)
+                # __meta_kubernetes_pod_label_linkerd_io_foo=bar =>
+                # foo=bar
+                - action: labelmap
+                  regex: __meta_kubernetes_pod_label_linkerd_io_(.+)
+                # Copy all pod labels to tmp labels
+                - action: labelmap
+                  regex: __meta_kubernetes_pod_label_(.+)
+                  replacement: __tmp_pod_label_$1
+                # Take `linkerd_io_` prefixed labels and copy them without the prefix
+                - action: labelmap
+                  regex: __tmp_pod_label_linkerd_io_(.+)
+                  replacement: __tmp_pod_label_$1
+                # Drop the `linkerd_io_` originals
+                - action: labeldrop
+                  regex: __tmp_pod_label_linkerd_io_(.+)
+                # Copy tmp labels into real labels
+                - action: labelmap
+                  regex: __tmp_pod_label_(.+)
+            - job_name: opencost
+              honor_labels: true
+              scrape_interval: 1m
+              scrape_timeout: 10s
+              metrics_path: /metrics
+              scheme: http
+              dns_sd_configs:
+                - names:
+                    - opencost.opencost
+                  type: A
+                  port: 9003
+prometheusOperator:
+    prometheusConfigReloader:
+        resources:
+            requests:
+                cpu: 50m
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2023-10-19T09:16:11Z"
+    mac: ENC[AES256_GCM,data:RYhM0Oii7blmJl+mg8aNJ5u9j7TcXghE5rWhiIZiunze/bxWZFpEWB5eV3Rdk/HQHKKBL+elU4pOJYce9C3fYqYiG/y3t2gMrPxTR3Z/hLuPKKpH68n4/wv6xCFQo7cKpEQz+QkXHqmRPiuE1q9l9Knjb2iT/reXwETyE85plao=,iv:N5ydV+XQaKMI18GcwiEjSPHd8n+MvzprH/xC1qgAQUs=,tag:cqH4Z/kX7fTGgGu9BoqTzA==,type:str]
+    pgp:
+        - created_at: "2023-10-19T09:16:09Z"
+          enc: |
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMA38T7Az157GMAQ/9ELLl6ZpdIeFhNwMCvD+3ZAQIlk9SYAw3fa9aO3PHWMUi
+            O+cYGH3HU2QRiJ85RMLkDDwbWLZtM15PI3ZGzBnaBT2mxV9mMSpqYXl7yX+r/y9H
+            gN2bKchIQNMgksaQxtOvUu6TvTxJF+fU10G+Iu8DcOSSShUKIzSNCqVnqvpJzgZC
+            jMUJSfZKnVvk8vd7vz4RzA1rM7HfZP/DnGXi46oTqOllUPvjeZ4YUrOrSDYyc7e/
+            bAG/eE6RfVqGg4cujRdYPIOZ1STshTYcSNp1jWLUC3mftZlQdsqzQ1n9/RAPlAji
+            cFRBS5gYuhSjOVmi26wGwHNEMXFe+0A/ho/C4IcTXHZBZb/fLx5ZPKTpiv1Ix7wJ
+            5krqn8kxQy+mEk+GBzGVpAJgABwsXo+n/Us5z3gJul9WoC+nkgay7zF9fXRcMALK
+            G96GIyIr7vU+BWgUmX1rXxdMaiMQ0BG7ihTwcFPvDP1D1k6CYoRUyzXc3fhtW9TW
+            pBMNbSELECNPSDPuumxtdFCg3BMpkdLmMf1Fl6iT930PBLQTs8SVw7rMvdv5ZW4K
+            MuyP2SEAfZWuwXxSJ+ee7+N3sH2LW/S3PnSYr4+sbaQT1VS85Ptb4lLdoGdNtKCM
+            Fw11wcBFy1k4dHvLnnL7xZXuBxsQ0HuUCb4LzJLN1IGMNVWLBzD5iadNAUG4wTXS
+            XgFBWWY//Guafl4G+39QLG0FQ34PwG+Ca5nve3KsKsArOLiT8WuV93Q/XfdyWjh6
+            lznf3A1ik8EZcg/bd9TBG3DGBtCMxR3FPqZSkPC6Ll/CqPT/XbWVMLsnwBom+sY=
+            =XpsY
+            -----END PGP MESSAGE-----
+          fp: 129994A38E40322EE2A4FA6CB59C51DA13B1BF22
+    encrypted_regex: ^(client_id|client_secret|auth_url|token_url|server|hosts|api_url|channel|username)$
+    version: 3.7.3

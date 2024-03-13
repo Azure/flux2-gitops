@@ -1,0 +1,20 @@
+extraVolumes:
+  - name: service-key-secret
+    secret:
+      secretName: azure-service-key
+opencost:
+  exporter:
+    extraVolumeMounts:
+      - mountPath: /var/secrets
+        name: service-key-secret
+  metrics:
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: prometheus      
+  prometheus:
+    internal:
+      enabled: true
+      serviceName: prometheus-kube-prometheus-prometheus
+      namespaceName: monitoring
+      port: 9090        

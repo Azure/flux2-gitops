@@ -1,0 +1,105 @@
+# Default values
+# https://artifacthub.io/packages/helm/bitnami/rabbitmq
+auth:
+    username: ENC[AES256_GCM,data:M5nxGUXB4aU=,iv:8Ws8wPAZDvkU8q4f1E/lhRZ8YyZzgA/99vzraPu3m5I=,tag:+l83k7B+Pnci1igVv0tpNQ==,type:str]
+    password: ENC[AES256_GCM,data:SxiCMQtjE04=,iv:UNDRDTvCv+yZqUHYj1i0vQYhk4+p5Iua7m2jtO3XZmw=,tag:uS5DW3p1FQXow3fAqKX6jQ==,type:str]
+extraPlugins: rabbitmq_amqp1_0
+persistence:
+    storageClass: default
+    size: 8Gi
+metrics:
+    enabled: true
+    serviceMonitor:
+        enabled: true
+        labels:
+            release: prometheus
+    prometheusRule:
+        enabled: true
+        additionalLabels: null
+        labels:
+            release: prometheus
+        rules:
+            - alert: RabbitmqDown
+              expr: rabbitmq_up{service="{{ template "common.names.fullname" . }}"} == 0
+              for: 5m
+              labels:
+                severity: error
+              annotations:
+                summary: Rabbitmq down (instance {{ "{{ $labels.instance }}" }})
+                description: RabbitMQ node down
+            - alert: ClusterDown
+              expr: |
+                sum(rabbitmq_running{service="{{ template "common.names.fullname" . }}"})
+                < {{ .Values.replicaCount }}
+              for: 5m
+              labels:
+                severity: error
+              annotations:
+                summary: Cluster down (instance {{ "{{ $labels.instance }}" }})
+                description: |
+                    Less than {{ .Values.replicaCount }} nodes running in RabbitMQ cluster
+                    VALUE = {{ "{{ $value }}" }}
+            - alert: ClusterPartition
+              expr: rabbitmq_partitions{service="{{ template "common.names.fullname" . }}"} > 0
+              for: 5m
+              labels:
+                severity: error
+              annotations:
+                summary: Cluster partition (instance {{ "{{ $labels.instance }}" }})
+                description: |
+                    Cluster partition
+                    VALUE = {{ "{{ $value }}" }}
+            - alert: OutOfMemory
+              expr: |
+                rabbitmq_node_mem_used{service="{{ template "common.names.fullname" . }}"}
+                / rabbitmq_node_mem_limit{service="{{ template "common.names.fullname" . }}"}
+                * 100 > 90
+              for: 5m
+              labels:
+                severity: warning
+              annotations:
+                summary: Out of memory (instance {{ "{{ $labels.instance }}" }})
+                description: |
+                    Memory available for RabbmitMQ is low (< 10%)\n  VALUE = {{ "{{ $value }}" }}
+                    LABELS: {{ "{{ $labels }}" }}
+            - alert: TooManyConnections
+              expr: rabbitmq_connectionsTotal{service="{{ template "common.names.fullname" . }}"} > 1000
+              for: 5m
+              labels:
+                severity: warning
+              annotations:
+                summary: Too many connections (instance {{ "{{ $labels.instance }}" }})
+                description: |-
+                    RabbitMQ instance has too many connections (> 1000)
+                    VALUE = {{ "{{ $value }}" }}\n  LABELS: {{ "{{ $labels }}" }}
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2023-09-28T00:34:24Z"
+    mac: ENC[AES256_GCM,data:sDi+3OtC8UgzA6hEvROmKNySG5zJ07t2gr+DPyBBNonMlYWAY3CZIuEYb46bpMEgHXUxHR2I91kX6ZFq7UfhleYDwwu9whPVa3Nsxszo3RLIET3pNZ9A8YcAwzvGX8VYo2nmNWGJ8tj5U5xFYoXjP1EXhT/xB4hR8UJ2ZGQgx3Y=,iv:TO/TFE591PrsFcLbxM1punvsosdIV/P+ZrYMaCuQVzA=,tag:lc5bcnSBP57FZgtrylMlaw==,type:str]
+    pgp:
+        - created_at: "2023-09-28T00:34:23Z"
+          enc: |
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMA38T7Az157GMARAAi1RnAm78KcgAy5PGw99XSlZ+YCWI25mRROdNBMkqikLR
+            3Ej5u4Cbl/rgfgCupG1jMUcNhXpvUkGJVQMikP1LVToii/vMHX5BAsamIK8myx6o
+            OlvTFVvbPhwx3TULCpuJC5kYy+oH0vjwhuJb4R5A1+jEpkf99BmSSa1XC9/7Q7qX
+            qaQKaP0Fg5spzchjZ/1rMmk8kg22d2icLxOKD7gusjRQux2nS1xPEgN7PPTbo7Aw
+            eiS0qIeHp3Kl2vHr+8P1nQXV03q2IhLQSJLOC+TOHb9DRybXjKlySFF9VruC8qcr
+            Ften2QXl47fgCvZ9y9FCX0ESwPEQRftbTwK11GIwu60PIIjcjvRXoT7X48tdzsbn
+            0yjwEV4JLENeNxzNiaW9Tz2szGTKZrTTL5olLdMmlNq85BNa1dGtZocrx31SPdEt
+            XDySTV/2jcaOPs+FMLdVjPecFV5kdNBgSvEBKueXmCIHBSKqmitmOcv1mtMyxfGh
+            RAUZPstfT6sI+A1CbU7uFOprGlkEHsGHXyNMMNaljDstkUYD+y5qKKvll32sUb26
+            rdS0/8RggAFLH78SO24fNDUvw2Lv3w6M6uNlSFvlGry/7aV6C/XBvM7wQ3iRUamE
+            3fi90h/T+qqe/3rOX5P6Ze3aPiBvQKtorp9872ZFBHrQ2ffqcGyV+ubSVWqFjhLS
+            XgG/3QVYIzUVq48fMYR70S35ofdwjkayBuEGNDGYvywKxizlylSJp8e7S32CA8RL
+            bIu4NZ5ljPYXUnxcurWp+39Zm2qoWguZiIRbIyovD0DVl5HYaS1LU5zPYLuhi5Y=
+            =SAew
+            -----END PGP MESSAGE-----
+          fp: 129994A38E40322EE2A4FA6CB59C51DA13B1BF22
+    encrypted_regex: ^(auth)$
+    version: 3.7.3
